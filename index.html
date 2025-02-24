@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Job Application Tracker</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="bg-gray-50 font-['Inter']">
+    <div class="container mx-auto px-4 py-8 max-w-6xl">
+        <h1 class="text-3xl font-bold text-gray-800 mb-8">Job Application Tracker</h1>
+        
+        <!-- Add New Application Form -->
+        <div class="bg-white p-6 rounded-lg shadow-md mb-8">
+            <h2 class="text-xl font-semibold mb-4">Add New Application</h2>
+            <form id="applicationForm" class="space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Company Name</label>
+                        <input type="text" id="companyName" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Role</label>
+                        <input type="text" id="role" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border">
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Username/Email</label>
+                        <input type="text" id="username" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Password</label>
+                        <input type="password" id="password" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Application Date</label>
+                    <input type="date" id="date" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Description</label>
+                    <textarea id="description" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border"></textarea>
+                </div>
+                <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors">
+                    Add Application
+                </button>
+            </form>
+        </div>
+
+        <!-- Applications List -->
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <h2 class="text-xl font-semibold mb-4">Your Applications</h2>
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Company</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date Applied</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="applicationsList" class="bg-white divide-y divide-gray-200">
+                        <!-- Applications will be inserted here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Application Details Modal -->
+    <div id="detailsModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full">
+        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+            <div id="modalContent" class="space-y-4">
+                <!-- Modal content will be inserted here -->
+            </div>
+            <div class="mt-4">
+                <button onclick="closeModal()" class="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600 transition-colors">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Store applications in localStorage
+        let applications = JSON.parse(localStorage.getItem('applications')) || [];
+
+        // Form submission handler
+        document.getElementById('applicationForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const newApplication = {
+                id: Date.now(),
+                companyName: document.getElementById('companyName').value,
+                role: document.getElementById('role').value,
+                username: document.getElementById('username').value,
+                password: document.getElementById('password').value,
+                date: document.getElementById('date').value,
+                description: document.getElementById('description').value
+            };
+
+            applications.push(newApplication);
+            localStorage.setItem('applications', JSON.stringify(applications));
+            
+            renderApplications();
+            this.reset();
+        });
+
+        // Render applications to table
+        function renderApplications() {
+            const tbody = document.getElementById('applicationsList');
+            tbody.innerHTML = '';
+
+            applications.forEach(app => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="px-6 py-4 whitespace-nowrap">${app.companyName}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">${app.role}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">${app.date}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <button onclick="viewDetails(${app.id})" class="text-blue-600 hover:text-blue-800 mr-3">
+                            <i class="bi bi-eye"></i>
+                        </button>
+                        <button onclick="deleteApplication(${app.id})" class="text-red-600 hover:text-red-800">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // View application details
+        function viewDetails(id) {
+            const app = applications.find(a => a.id === id);
+            const modal = document.getElementById('detailsModal');
+            const content = document.getElementById('modalContent');
+            
+            content.innerHTML = `
+                <h3 class="text-lg font-bold mb-2">${app.companyName}</h3>
+                <p><strong>Role:</strong> ${app.role}</p>
+                <p><strong>Username/Email:</strong> ${app.username}</p>
+                <p><strong>Password:</strong> ${'•'.repeat(app.password.length)}</p>
+                <p><strong>Date Applied:</strong> ${app.date}</p>
+                <p><strong>Description:</strong></p>
+                <p class="mt-1">${app.description}</p>
+            `;
+            
+            modal.classList.remove('hidden');
+        }
+
+        // Close modal
+        function closeModal() {
+            document.getElementById('detailsModal').classList.add('hidden');
+        }
+
+        // Delete application
+        function deleteApplication(id) {
+            if (confirm('Are you sure you want to delete this application?')) {
+                applications = applications.filter(app => app.id !== id);
+                localStorage.setItem('applications', JSON.stringify(applications));
+                renderApplications();
+            }
+        }
+
+        // Initial render
+        renderApplications();
+    </script>
+<script>document.body.addEventListener('wheel', e => { if (!e.ctrlKey) return; e.preventDefault(); return }, { passive: false })</script>
+	</body>
+</html>
